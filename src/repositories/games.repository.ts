@@ -1,28 +1,58 @@
-import { Games } from "../protocols";
 import db from "../config/database.connection";
 
 function get() {
-    return db.query<Games>("SELECT * FROM games")
+  return db.games.findMany();
+}
+
+function getGame(gameTitle: string) {
+  return db.games.findMany({
+    where: {
+      title: {
+        startsWith: gameTitle,
+        mode: "insensitive",
+      },
+    },
+  });
 }
 
 function create(title: string, platform: string) {
-    return db.query("INSERT INTO games (title, platform) VALUES ($1, $2)", [title, platform])
+  return db.games.create({
+    data: {
+      title,
+      platform,
+    },
+  });
+}
+
+function findById(id: number) {
+  return db.games.findUnique({
+    where: { id },
+  });
 }
 
 function update(id: number, title: string, platform: string) {
-    return db.query("UPDATE games SET title = $1, platform = $2 WHERE id = $3", [title, platform, id]);
+  return db.games.update({
+    where: {
+      id,
+    },
+    data: {
+      title,
+      platform,
+    },
+  });
 }
 
 function deleteGame(id: number) {
-    return db.query("DELETE FROM games WHERE id = $1", [id]);
+  return db.games.delete({ where: { id } });
 }
-
 
 const gamesRepository = {
-    get,
-    create,
-    update,
-    deleteGame
-}
+  get,
+  getGame,
+  create,
+  findById,
+  update,
+  deleteGame
+};
 
-export default gamesRepository
+export default gamesRepository;
