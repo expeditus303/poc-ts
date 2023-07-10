@@ -1,7 +1,9 @@
 import { NextFunction, Request, Response } from "express";
 import gamesService from "../services/games.service";
-import { CreateOrUpdateGame } from "protocols";
+import { CreateGame, Game, GameId, UpdateGame } from "protocols";
 import { StatusCodes } from "http-status-codes";
+import error from "../errors/errors";
+
 
 async function get(req: Request, res: Response, next: NextFunction) {
   try {
@@ -22,50 +24,56 @@ async function getGame(req: Request, res: Response, next: NextFunction) {
     return res.sendStatus(StatusCodes.UNPROCESSABLE_ENTITY);
 
   try {
-    const games = await gamesService.getGame(gameTitle);
+    const game = await gamesService.getGame(gameTitle);
 
-    res.status(200).send(games);
+    res.status(200).send(game);
   } catch (err) {
-    next(err)
+    next(err);
   }
 }
 
 async function create(req: Request, res: Response, next: NextFunction) {
-  const { title, platform } = req.body as CreateOrUpdateGame;
+  const { title, platform } = req.body as CreateGame;
 
   try {
     const game = await gamesService.create(title, platform);
 
     res.status(201).send(game);
   } catch (err) {
-    next(err)
+    next(err);
   }
 }
 
-type UpdateOrDeleteGame = { id: string };
-
 async function update(req: Request, res: Response, next: NextFunction) {
-  const { id } = req.params as UpdateOrDeleteGame;
-  const { title, platform } = req.body as CreateOrUpdateGame;
+  const { id } = req.params as GameId
+  const { title, platform } = req.body as UpdateGame;
 
   try {
-    const gameUpdated = await gamesService.update(+id, title, platform);
+    let convertId;
+    if (id) {
+      convertId = +id;
+      if (isNaN(convertId)) {
+        throw error.unprocessableEntity("id must be a number");
+      }
+    }
+
+    const gameUpdated = await gamesService.update({ id: +id, title, platform });
 
     res.status(StatusCodes.OK).send(gameUpdated);
   } catch (err) {
-    next(err)
+    next(err);
   }
 }
 
 async function deleteGame(req: Request, res: Response, next: NextFunction) {
-  const { id } = req.params as UpdateOrDeleteGame;
+  const { id } = req.params as GameId
 
   try {
     const gameDeleted = await gamesService.deleteGame(+id);
 
-    res.status(200).send(gameDeleted)
+    res.status(200).send(gameDeleted);
   } catch (err) {
-    next(err)
+    next(err);
   }
 }
 

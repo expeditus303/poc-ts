@@ -1,3 +1,4 @@
+import { Game } from "protocols";
 import db from "../config/database.connection";
 
 function get() {
@@ -8,7 +9,7 @@ function getGame(gameTitle: string) {
   return db.games.findMany({
     where: {
       title: {
-        startsWith: gameTitle,
+        contains: gameTitle,
         mode: "insensitive",
       },
     },
@@ -30,14 +31,14 @@ function findById(id: number) {
   });
 }
 
-function update(id: number, title: string, platform: string) {
+function update(game: Game) {
   return db.games.update({
     where: {
-      id,
+      id: game.id,
     },
     data: {
-      title,
-      platform,
+      title: game.title,
+      platform: game.platform,
     },
   });
 }

@@ -1,6 +1,6 @@
 import gamesRepository from "../repositories/games.repository"
 import error from "../errors/errors"
-import { returnStatus } from "protocols"
+import { Game, returnStatus } from "protocols"
 
 async function get(){
     const result = await gamesRepository.get()
@@ -15,7 +15,7 @@ async function getGame(gameTitle: string){
     return result
 }
 
-function returnStatus(title: string, platform: string, status: string){
+function returnGameStatus(title: string, platform: string, status: string){
     const date = new Date()
     const createdOrUpdatedGame: returnStatus = {
         title,
@@ -28,18 +28,18 @@ function returnStatus(title: string, platform: string, status: string){
 
 async function create(title: string, platform: string){
     await gamesRepository.create(title, platform)
-    return returnStatus(title, platform, "created")
+    return returnGameStatus(title, platform, "created")
 }
 
-async function update(id: number, title: string, platform: string){
+async function update(game: Game){
 
-    const existingGame = await gamesRepository.findById(id)
+    const existingGame = await gamesRepository.findById(game.id)
 
     if(!existingGame) throw error.notFound("Game ID not found :(")
 
-    await gamesRepository.update(id, title, platform)
+    const {title, platform} = await gamesRepository.update(game)
 
-    return returnStatus(title, platform, "updated")
+    return returnGameStatus(title, platform, "updated")
 }
 
 async function deleteGame(id: number){
@@ -51,7 +51,7 @@ async function deleteGame(id: number){
     
     const {title, platform} = existingGame
 
-    return returnStatus(title, platform, "deleted")
+    return returnGameStatus(title, platform, "deleted")
 }
 
 const gamesService = {

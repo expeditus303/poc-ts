@@ -1,10 +1,13 @@
-function errorFactory(name: string, message: string) {
+function errorFactory(name: string, message: string | string[]) {
     return {name, message}
 }
 
-function unprocessableEntity(message: string = "Unprocessable Entity"){
-    return errorFactory("UnprocessableEntityError", message)
+function unprocessableEntity(message: string | string[] = "Unprocessable Entity") {
+
+    return errorFactory("UnprocessableEntityError", message);
 }
+  
+  
 
 function conflict(message: string = "Conflict") {
     return errorFactory("ConflictError", message)
